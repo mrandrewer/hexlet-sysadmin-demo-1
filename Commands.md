@@ -1,6 +1,9 @@
 # Модуль 1 Настройка сетевой инфраструктуры 
 
-## Задания 1, 2, 4 и 8
+## Заданиe 1 Произведите базовую настройку устройств
+## Заданиe 2 Настройка ISP
+## Заданиe 4 Настройте на интерфейсе HQ-RTR в сторону офиса HQ виртуальный коммутатор
+## Заданиe 8 Настройка динамической трансляции адресов.
 
 Настройка ISP
 ```sh
@@ -192,7 +195,7 @@ hostname
 ip -br a
 ```
 
-## Задание 3
+## Задание 3 Создание локальных учетных записей
 
 Создание пользователя на HQ-SRV и BR-SRV
 ```sh
@@ -220,7 +223,7 @@ echo 'WHEEL_USERS ALL = (ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
 grep net_admin /etc/group
 ```
 
-## Задание 5
+## Задание 5 Настройка безопасного удаленного доступа на серверах HQ-SRV и BR-SRV
 
 Настройка удаленного доступа на HQ-SRV и BR-SRV
 ```sh
@@ -234,7 +237,7 @@ echo "**************************" >> /etc/openssh/banner
 systemctl restart sshd
 ```
 
-## Задание 6
+## Задание 6 Между офисами HQ и BR необходимо сконфигурировать ip туннель
 
 Настройка туннеля на HQ-RTR
 ```sh
@@ -263,7 +266,7 @@ nmcli connection modify gre1 ip-tunnel.ttl 64
 systemctl restart network
 ```
 
-## Задание 7
+## Задание 7 Обеспечьте динамическую маршрутизацию
 
 Установка frr
 ```sh
@@ -286,6 +289,8 @@ network 192.168.99.0/29 area 0
 ex
 int gre1
 no ip ospf passive
+ip ospf authentication
+ip ospf authentication-key P@ssw0rd
 ex
 ex
 wr
@@ -307,6 +312,8 @@ network 192.168.1.0/27 area 0
 ex
 int gre1
 no ip ospf passive
+ip ospf authentication
+ip ospf authentication-key P@ssw0rd
 ex
 ex
 wr
@@ -314,4 +321,11 @@ ex
 
 cat /etc/frr/frr.conf
 systemctl restart frr
+
+vtysh
+show ip ospf interface gre1
+ex
 ```
+
+
+## Задание 9 Настройка протокола динамической конфигурации хостов
