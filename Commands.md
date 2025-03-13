@@ -179,3 +179,31 @@ apt-get update -y
 hostname
 ip -br a
 ```
+
+## Задание 3
+
+Создание пользователя на HQ-SRV и BR-SRV
+```sh
+# Создание пользователя
+groupadd sshuser -g1010
+useradd sshuser -u1010 -g1010 -m -s/bin/bash
+passwd sshuser
+
+grep sshuser /etc/passwd
+# Настройка прав суперпользователя
+usermod -aG wheel sshuser
+echo 'WHEEL_USERS ALL = (ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
+```
+
+Создание пользователя на HQ-RTR и BR-RTR
+```sh
+# Создание пользователя
+useradd net_admin -m -s/bin/bash -Gwheel
+passwd net_admin
+
+grep net_admin /etc/passwd
+
+# Настройка прав суперпользователя
+echo 'WHEEL_USERS ALL = (ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
+grep net_admin /etc/group
+```
