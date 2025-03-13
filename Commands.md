@@ -236,7 +236,7 @@ systemctl restart sshd
 
 ## Задание 6
 
-Настройка туннеля на HQ-RTR делается через
+Настройка туннеля на HQ-RTR
 ```sh
 apt-get install NetworkManager-tui -y
 systemctl enable --now NetworkManager
@@ -261,4 +261,57 @@ nmcli connection modify gre1 ip-tunnel.ttl 64
 #nmcli connection up gre1
 
 systemctl restart network
+```
+
+## Задание 7
+
+Установка frr
+```sh
+apt-get install frr -y
+sed -i 's/ospfd=no/ospfd=yes/g' /etc/frr/daemons
+systemctl enable --now frr
+```
+
+Настройка ospf HQ-RTR через vtysh
+```sh
+vtysh
+conf t
+ip forwarding
+router ospf
+passive-interface default
+network 10.0.1.0/30 area 0
+network 192.168.100.0/26 area 0
+network 192.168.200.0/28 area 0
+network 192.168.99.0/29 area 0
+ex
+int gre1
+no ip ospf passive
+ex
+ex
+wr
+ex
+
+cat /etc/frr/frr.conf
+systemctl restart frr
+```
+
+Настройка ospf BR-RTR через vtysh
+```sh
+vtysh
+conf t
+ip forwarding
+router ospf
+passive-interface default
+network 10.0.1.0/30 area 0
+network 192.168.1.0/27 area 0
+ex
+int gre1
+no ip ospf passive
+ex
+ex
+wr
+ex
+
+cat /etc/frr/frr.conf
+systemctl restart frr
 ```
