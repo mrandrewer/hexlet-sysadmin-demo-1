@@ -207,3 +207,17 @@ grep net_admin /etc/passwd
 echo 'WHEEL_USERS ALL = (ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
 grep net_admin /etc/group
 ```
+
+## Задание 5
+
+Настройка удаленного доступа на HQ-SRV и BR-SRV
+```sh
+echo "Port 2024" >> /etc/openssh/sshd_config
+echo "AllowUsers sshuser" >> /etc/openssh/sshd_config
+echo "MaxAuthTries 2" >> /etc/openssh/sshd_config
+echo "Banner /etc/openssh/banner" >> /etc/openssh/sshd_config
+echo "**************************" >> /etc/openssh/banner
+echo "* Authorized access only *" >> /etc/openssh/banner
+echo "**************************" >> /etc/openssh/banner
+systemctl restart sshd
+```
