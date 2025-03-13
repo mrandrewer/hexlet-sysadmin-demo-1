@@ -17,6 +17,7 @@ apt-get update -y
 apt-get install iptables -y
 iptables -t nat -A POSTROUTING -j MASQUERADE -o ens18 
 iptables-save > /etc/sysconfig/iptables
+systemctl enable --now iptables
 
 # Установка и настройка NetworkManager
 apt-get install NetworkManager-tui -y
@@ -49,10 +50,15 @@ systemctl restart network
 # Обновление индекса пакетов
 apt-get update -y
 
+# Установка и настройка NetworkManager
+apt-get install NetworkManager-tui -y
+systemctl enable --now NetworkManager
+
 # Включение NAT
 apt-get install iptables -y
 iptables -t nat -A POSTROUTING -j MASQUERADE -o ens18 
 iptables-save > /etc/sysconfig/iptables
+systemctl enable --now iptables
 
 # Включение виртуального коммутатора
 apt-get install -y openvswitch
@@ -146,11 +152,17 @@ apt-get update -y
 apt-get install iptables -y
 iptables -t nat -A POSTROUTING -j MASQUERADE -o ens18 
 iptables-save > /etc/sysconfig/iptables
+systemctl enable --now iptables
 
 # Настройка сети в сторону BR-SRV
-mkdir /etc/net/ifaces/ens19
-cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
-echo "192.168.1.1/27" > /etc/net/ifaces/ens19/ipv4address
+# Установка и настройка NetworkManager
+apt-get install NetworkManager-tui -y
+systemctl enable --now NetworkManager
+nmcli con mod "Wired connection 2" ipv4.method "manual" ipv4.addresses "192.168.1.1/27"
+
+#mkdir /etc/net/ifaces/ens19
+#cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
+#echo "192.168.1.1/27" > /etc/net/ifaces/ens19/ipv4address
 systemctl restart network
 
 # Вывод hostname и сетевых интерфейсов
@@ -220,4 +232,33 @@ echo "**************************" >> /etc/openssh/banner
 echo "* Authorized access only *" >> /etc/openssh/banner
 echo "**************************" >> /etc/openssh/banner
 systemctl restart sshd
+```
+
+## Задание 6
+
+Настройка туннеля на HQ-RTR делается через
+```sh
+apt-get install NetworkManager-tui -y
+systemctl enable --now NetworkManager
+nmcli connection add type ip-tunnel ip-tunnel.mode gre ip-tunnel.parent ens18 con-name gre1 ifname gre1 remote 172.16.5.2 local 172.16.4.2
+nmcli connection modify gre1 ipv4.addresses '10.0.1.1/30'
+nmcli connection modify gre1 ipv4.method manual
+nmcli connection modify gre1 ip-tunnel.ttl 64
+
+#nmcli connection up gre1
+
+systemctl restart network
+```
+
+Настройка туннеля на BR-RTR
+```sh
+apt-get install NetworkManager-tui -y
+systemctl enable --now NetworkManager
+nmcli connection add type ip-tunnel ip-tunnel.mode gre ip-tunnel.parent ens18 con-name gre1 ifname gre1 remote 172.16.4.2 local 172.16.5.2
+nmcli connection modify gre1 ipv4.addresses '10.0.1.2/30'
+nmcli connection modify gre1 ipv4.method manual
+nmcli connection modify gre1 ip-tunnel.ttl 64
+#nmcli connection up gre1
+
+systemctl restart network
 ```
