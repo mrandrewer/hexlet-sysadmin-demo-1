@@ -329,3 +329,34 @@ ex
 
 
 ## Задание 9 Настройка протокола динамической конфигурации хостов
+
+Настройка dhcp server на HQ-RTR
+```sh
+apt-get install -y dhcp-server
+sed -i 's/DHCPDARGS=/DHCPDARGS=vlan200/g' /etc/sysconfig/dhcpd
+cp /etc/dhcp/dhcpd.conf.sample /etc/dhcp/dhcpd.conf
+vim /etc/dhcp/dhcpd.conf
+```
+
+Пример содержимого файла
+```sh
+ddns-update-style interim;
+
+subnet 192.168.200.0 netmask 255.255.255.240 {
+        option routers                  192.168.200.1;
+        option subnet-mask              255.255.255.240;
+
+        option nis-domain               "au-team.irpo";
+        option domain-name              "au-team.irpo";
+        option domain-name-servers      192.168.100.2;
+
+        range dynamic-bootp 192.168.200.2 192.168.200.14;
+        default-lease-time 21600;
+        max-lease-time 43200;
+}
+```
+```sh
+systemctl enable --now dhcpd
+```
+
+После этого на клиенте переключить настройку на DHCP
