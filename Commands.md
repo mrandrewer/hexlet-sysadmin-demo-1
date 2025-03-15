@@ -488,3 +488,12 @@ echo "nameserver 192.168.100.2" > /etc/net/ifaces/ens18/resolv.conf
 echo "domain au-team.irpo" >> /etc/net/ifaces/ens18/resolv.conf
 systemctl restart network
 ```
+
+
+## Задание 11 Настройка часового пояса
+
+```sh
+apt-get install tzdata
+timedatectl set-timezone Europe/Moscow
+timedatectl
+```
