@@ -357,7 +357,7 @@ subnet 192.168.200.0 netmask 255.255.255.240 {
 
 host hq-cli {
         hardware ethernet bc:24:11:d4:bf:29;
-        fixed-addres 192.168.200.2;
+        fixed-address 192.168.200.2;
 }
 ```
 ```sh
