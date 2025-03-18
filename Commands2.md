@@ -56,3 +56,48 @@ echo '%hq ALL = (ALL:ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id' >> /etc/su
 
 Введем машину HQ-CLI в домен
 
+## Задание 2 Сконфигурируйте файловое хранилище на HQ-SRV
+
+Нет дисков, пока не выполнить
+
+## Задание 3 Настройте службу сетевого времени на базе сервиса chrony 
+
+Устанавливаем chrony на hq-rtr
+```sh
+apt-get install -y chrony
+```
+
+Модифицируем файл /etc/chrony.conf
+Вписываем следующие настройки вместо использования pool.ntp.org
+`
+server 127.0.0.1 iburst prefer
+local stratum 5
+
+allow 192.168.100.0/26
+allow 192.168.200.0/28
+allow 192.168.1.0/27
+allow 10.0.1.0/30
+`
+
+Запускаем и проверяем работу chrony
+```sh
+systemctl enable --now chronyd
+chronyc sources
+chronyc tracking | grep Stratum
+```
+
+Настраиваем клиентов chrony
+```sh
+apt-get install -y chrony
+sed -i 's/pool pool.ntp.org/server 192.168.100.1/g' /etc/chrony.conf
+systemctl enable --now chronyd
+chronyc tracking 
+```
+
+Для hq-cli
+```sh
+apt-get install -y chrony
+sed -i 's/pool AU-TEAM.IRPO/server 192.168.100.1/g' /etc/chrony.conf
+systemctl enable --now chronyd
+chronyc tracking 
+```
