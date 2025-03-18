@@ -454,7 +454,7 @@ $TTL    1D
         IN      NS      100.168.192.in-addr.arpa.
         IN      A       192.168.100.2
 2       IN      PTR     hq-srv.au-team.irpo.
-1       IN      PTR     hq-rtr.au-tyeam.irpo.
+1       IN      PTR     hq-rtr.au-team.irpo.
 ```
 
 Содержимое файла vlan200
@@ -470,7 +470,7 @@ $TTL    1D
         IN      NS      200.168.192.in-addr.arpa.
         IN      A       192.168.200.2
 2       IN      PTR     hq-cli.au-team.irpo.
-1       IN      PTR     hq-rtr.au-tyeam.irpo.
+1       IN      PTR     hq-rtr.au-team.irpo.
 ```
 
 Настраиваем rndc
