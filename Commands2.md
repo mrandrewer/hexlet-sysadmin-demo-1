@@ -58,7 +58,50 @@ echo '%hq ALL = (ALL:ALL) NOPASSWD: /bin/cat, /bin/grep, /usr/bin/id' >> /etc/su
 
 ## Задание 2 Сконфигурируйте файловое хранилище на HQ-SRV
 
-Нет дисков, пока не выполнить
+Неразмеченные диски добавляем руками через оснастку proxmox
+
+Для очистки можно использовать скрипт
+```sh
+# Обнуляем суперблоки для добавленных дисков
+mdadm --zero-superblock --force /dev/sd{b,c,d}
+# Удаляем старые метаданные и подпись на дисках:
+wipefs --all --force /dev/sd{b,c,d}
+```
+
+Создаем массив
+```sh
+mdadm --create /dev/md0 -l 5 -n 3 /dev/sd{b,c,d}
+/bin/cp /etc/mdadm.conf.sample /etc/mdadm.conf
+mdadm --detail --scan | tee -a /etc/mdadm.conf
+```
+
+Создаем файловую систему и точку монтирования
+```sh
+mkfs -t ext4 /dev/md0
+mkdir /mnt/raid5
+echo "/dev/md0  /mnt/raid5  ext4  defaults  0  0" >> /etc/fstab
+mount -a
+df -h
+```
+
+Устанавливаем и настраиваем сервер nfs
+```sh
+apt-get install -y nfs-server
+mkdir /mnt/raid5/nfs
+chmod 766 /mnt/raid5/nfs
+echo "/mnt/raid5/nfs 192.168.200.0/28(rw,no_root_squash)" >> /etc/exports
+exportfs -a
+systemctl enable --now nfs-server
+```
+
+Настраиваем доступ к nfs на клиенте
+```sh
+mkdir /mnt/nfs
+echo "192.168.100.2:/mnt/raid5/nfs  /mnt/nfs  nfs  defaults  0  0" >> /etc/fstab
+mount -a
+df -h
+```
+
 
 ## Задание 3 Настройте службу сетевого времени на базе сервиса chrony 
 
