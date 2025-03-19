@@ -144,3 +144,22 @@ sed -i 's/pool AU-TEAM.IRPO/server 192.168.100.1/g' /etc/chrony.conf
 systemctl enable --now chronyd
 chronyc tracking 
 ```
+
+## Задание 4 Сконфигурируйте ansible на сервере BR-SRV 
+
+Устанавливаем ansible на br-srv
+```sh
+apt-get install -y ansible
+
+echo "[all]" >> /etc/ansible/hosts
+echo "hq-rtr ansible-host=192.168.100.1 ansible_connection=local" >> /etc/ansible/hosts
+echo "hq-srv ansible-host=192.168.100.2 ansible_connection=local" >> /etc/ansible/hosts
+echo "hq-cli ansible-host=192.168.200.2 ansible_connection=local" >> /etc/ansible/hosts
+echo "br-rtr ansible-host=192.168.1.1 ansible_connection=local" >> /etc/ansible/hosts
+```
+
+
+## Задание 9 Установка яндекс браузер
+```sh
+apt-get install -y yandex-browser-stable
+```
