@@ -158,6 +158,62 @@ echo "hq-cli ansible-host=192.168.200.2 ansible_connection=local" >> /etc/ansibl
 echo "br-rtr ansible-host=192.168.1.1 ansible_connection=local" >> /etc/ansible/hosts
 ```
 
+## Задание 5 Развертывание приложений в Docker на сервере BR-SRV
+
+Устанавливаем docker на сервере
+```sh
+apt-get install -y docker-io docker-compose
+systemctl enable --now docker
+mkdir -p /opt/docker
+vim /opt/docker/wiki.yml
+```
+
+В файл /opt/docker/wiki.yml записываем конфигурацию для контейнеров
+`
+# MediaWiki with MariaDB
+#
+# Access via "http://localhost:8080"
+#   (or "http://$(docker-machine ip):8080" if using docker-machine)
+version: '3'
+services:
+  wiki:
+    container_name: wiki
+    image: mediawiki
+    restart: always
+    ports:
+      - 8080:80
+    links:
+      - mariadb
+    volumes:
+      - images:/var/www/html/images
+      # - /root/LocalSettings.php:/var/www/html/LocalSettings.php
+  # This key also defines the name of the database host used during setup instead of the default "localhost"
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: mediawiki
+      MYSQL_USER: wiki
+      MYSQL_PASSWORD: WikiP@ssw0rd
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  images:
+  db:
+`
+
+```sh
+docker compose -f /opt/docker/wiki.yml up -d 
+docker compose ps
+```
+
+Далее открываем адрес вики с CLI и настраиваем в браузере
+После этого переносим содержимое загруженного файла LocalSettings.php на BR-SRV
+По заданию он должен лежать в домашней папке пользователя, так что это будет /root/LocalSettings.php
+Правим файл конфига и перезапускаем docker-compose
 
 ## Задание 9 Установка яндекс браузер
 ```sh
