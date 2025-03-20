@@ -234,6 +234,92 @@ systemctl restart iptables
 iptables-save 
 ```
 
+## Задание 7 Установка и настройка moodle на сервере HQ-SRV
+
+Устанавливаем необходимое ПО
+```sh
+apt-get install -y mariadb-server moodle-apache2 moodle-local-mysql
+```
+
+Настраиваем mariadb
+```sh
+systemctl enable --now mariadb
+mysql_secure_installation
+```
+
+Создаем БД для moodle
+```sh
+mysql -u root -p
+```
+
+Создаем БД для moodle
+```sql
+create database moodledb character set utf8mb4 collate utf8mb4_unicode_ci;
+create user 'moodle'@'localhost' identified by 'P@ssw0rd';
+grant all privileges on moodledb.* to  'moodle'@'localhost';
+flush privileges;
+exit;
+```
+
+Устанавливаем max input vars для php
+```sh
+nano /etc/php/8.2/apache2-mod_php/php.ini 
+```
+
+Инициализируем скрипт установки moodle
+```sh
+/usr/bin/php /var/www/webapps/moodle/admin/cli/install.php
+```
+
+```sh
+chown -R apache:apache /var/lib/moodle/default
+chmod -R 0777 /var/lib/moodle/default
+a2enmod rewrite_
+
+```
+
+## Задание 8 Настройка nginx на HQ-RTR 
+
+```sh
+apt-get install -y nginx nano
+nano /etc/nginx/sites-available.d/proxy.conf
+```
+
+Вписываем содержимое файла
+```conf
+server {
+    listen 80;
+    server_name wiki.au-team.irpo;
+   
+    location / {
+        proxy_pass http://192.168.1.2:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen 80;
+    server_name moodle.au-team.irpo;
+   
+    location / {
+        proxy_pass http://192.168.100.2;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+Включаем проксирование
+
+```sh
+ln -s /etc/nginx/sites-available.d/proxy.conf /etc/nginx/sites-enabled.d/
+systemctl restart nginx
+systemctl enable --now nginx
+```
+
 ## Задание 9 Установка яндекс браузер
 ```sh
 apt-get install -y yandex-browser-stable
