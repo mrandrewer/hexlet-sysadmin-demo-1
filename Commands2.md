@@ -215,6 +215,25 @@ docker compose ps
 По заданию он должен лежать в домашней папке пользователя, так что это будет /root/LocalSettings.php
 Правим файл конфига и перезапускаем docker-compose
 
+## Задание 6 Проброс портов на маршрутизаторах
+
+Команды для br-rtr
+```sh
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.1.2:8080 
+iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.1.2:2024
+iptables-save > /etc/sysconfig/iptables
+systemctl restart iptables
+iptables-save 
+```
+
+Команды для hq-rtr
+```sh
+iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.100.2:2024
+iptables-save > /etc/sysconfig/iptables
+systemctl restart iptables
+iptables-save 
+```
+
 ## Задание 9 Установка яндекс браузер
 ```sh
 apt-get install -y yandex-browser-stable
