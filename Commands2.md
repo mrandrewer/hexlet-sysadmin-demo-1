@@ -89,7 +89,7 @@ df -h
 apt-get install -y nfs-server
 mkdir /mnt/raid5/nfs
 chmod 766 /mnt/raid5/nfs
-echo "/mnt/raid5/nfs 192.168.200.0/28(rw,no_root_squash)" >> /etc/exports
+echo "/mnt/raid5/nfs 192.168.10.96/28(rw,no_root_squash)" >> /etc/exports
 exportfs -a
 systemctl enable --now nfs-server
 ```
@@ -97,7 +97,7 @@ systemctl enable --now nfs-server
 Настраиваем доступ к nfs на клиенте
 ```sh
 mkdir /mnt/nfs
-echo "192.168.100.2:/mnt/raid5/nfs  /mnt/nfs  nfs  defaults  0  0" >> /etc/fstab
+echo "192.168.10.2:/mnt/raid5/nfs  /mnt/nfs  nfs  defaults  0  0" >> /etc/fstab
 mount -a
 df -h
 ```
@@ -132,7 +132,7 @@ chronyc tracking | grep Stratum
 Настраиваем клиентов chrony
 ```sh
 apt-get install -y chrony
-sed -i 's/pool pool.ntp.org/server 192.168.100.1/g' /etc/chrony.conf
+sed -i 's/pool pool.ntp.org/server 192.168.10.1/g' /etc/chrony.conf
 systemctl enable --now chronyd
 chronyc tracking 
 ```
@@ -152,10 +152,10 @@ chronyc tracking
 apt-get install -y ansible
 
 echo "[all]" >> /etc/ansible/hosts
-echo "hq-rtr ansible-host=192.168.100.1 ansible_connection=local" >> /etc/ansible/hosts
-echo "hq-srv ansible-host=192.168.100.2 ansible_connection=local" >> /etc/ansible/hosts
-echo "hq-cli ansible-host=192.168.200.2 ansible_connection=local" >> /etc/ansible/hosts
-echo "br-rtr ansible-host=192.168.1.1 ansible_connection=local" >> /etc/ansible/hosts
+echo "hq-rtr ansible-host=192.168.10.1 ansible_connection=local" >> /etc/ansible/hosts
+echo "hq-srv ansible-host=192.168.10.2 ansible_connection=local" >> /etc/ansible/hosts
+echo "hq-cli ansible-host=192.168.10.98 ansible_connection=local" >> /etc/ansible/hosts
+echo "br-rtr ansible-host=192.168.10.66 ansible_connection=local" >> /etc/ansible/hosts
 ```
 
 ## Задание 5 Развертывание приложений в Docker на сервере BR-SRV
@@ -219,8 +219,8 @@ docker compose ps
 
 Команды для br-rtr
 ```sh
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.1.2:8080 
-iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.1.2:2024
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.10.66:8080 
+iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.10.66:2024
 iptables-save > /etc/sysconfig/iptables
 systemctl restart iptables
 iptables-save 
@@ -228,7 +228,7 @@ iptables-save
 
 Команды для hq-rtr
 ```sh
-iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.100.2:2024
+iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.10.2:2024
 iptables-save > /etc/sysconfig/iptables
 systemctl restart iptables
 iptables-save 
@@ -292,7 +292,7 @@ server {
     server_name wiki.au-team.irpo;
    
     location / {
-        proxy_pass http://192.168.1.2:8080;
+        proxy_pass http://192.168.10.66:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;
@@ -304,7 +304,7 @@ server {
     server_name moodle.au-team.irpo;
    
     location / {
-        proxy_pass http://192.168.100.2;
+        proxy_pass http://192.168.10.2;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Real-IP $remote_addr;

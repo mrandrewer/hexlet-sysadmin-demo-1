@@ -75,17 +75,17 @@ cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
 ovs-vsctl add-port HQ-SW vlan100 tag=100 -- set interface vlan100 type=internal
 mkdir /etc/net/ifaces/vlan100
 cp /etc/net/ifaces/ens18/options /etc/net/ifaces/vlan100/options
-echo "192.168.100.1/26" > /etc/net/ifaces/vlan100/ipv4address
+echo "192.168.10.1/26" > /etc/net/ifaces/vlan100/ipv4address
 
 ovs-vsctl add-port HQ-SW vlan200 tag=200 -- set interface vlan200 type=internal
 mkdir /etc/net/ifaces/vlan200
 cp /etc/net/ifaces/ens18/options /etc/net/ifaces/vlan200/options
-echo "192.168.200.1/28" > /etc/net/ifaces/vlan200/ipv4address
+echo "192.168.10.97/28" > /etc/net/ifaces/vlan200/ipv4address
 
 ovs-vsctl add-port HQ-SW vlan999 tag=999 -- set interface vlan999 type=internal
 mkdir /etc/net/ifaces/vlan999
 cp /etc/net/ifaces/ens18/options /etc/net/ifaces/vlan999/options
-echo "192.168.99.1/29" > /etc/net/ifaces/vlan999/ipv4address
+echo "192.168.10.113/29" > /etc/net/ifaces/vlan999/ipv4address
 systemctl restart network
 
 # Вывод hostname и сетевых интерфейсов
@@ -102,8 +102,8 @@ hostnamectl set-hostname HQ-SRV.au-team.irpo
 # Настройка адаптера к HQ-RTR
 sed -i 's/BOOTPROTO=dhcp4/BOOTPROTO=static/g' /etc/net/ifaces/ens18/options
 sed -i 's/BOOTPROTO=dhcp/BOOTPROTO=static/g' /etc/net/ifaces/ens18/options
-echo "192.168.100.2/26" > /etc/net/ifaces/ens18/ipv4address
-echo "default via 192.168.100.1" > /etc/net/ifaces/ens18/ipv4route
+echo "192.168.10.2/26" > /etc/net/ifaces/ens18/ipv4address
+echo "default via 192.168.10.1" > /etc/net/ifaces/ens18/ipv4route
 echo "nameserver 8.8.8.8" > /etc/net/ifaces/ens18/resolv.conf
 systemctl restart network
 
@@ -161,11 +161,11 @@ systemctl enable --now iptables
 # Установка и настройка NetworkManager
 apt-get install NetworkManager-tui -y
 systemctl enable --now NetworkManager
-nmcli con mod "Wired connection 2" ipv4.method "manual" ipv4.addresses "192.168.1.1/27"
+#nmcli con mod "Wired connection 2" ipv4.method "manual" ipv4.addresses "192.168.1.1/27"
 
-#mkdir /etc/net/ifaces/ens19
-#cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
-#echo "192.168.1.1/27" > /etc/net/ifaces/ens19/ipv4address
+mkdir /etc/net/ifaces/ens19
+cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
+echo "192.168.10.65/27" > /etc/net/ifaces/ens19/ipv4address
 systemctl restart network
 
 # Вывод hostname и сетевых интерфейсов
@@ -182,8 +182,8 @@ hostnamectl set-hostname BR-SRV.au-team.irpo
 # Настройка адаптера к HQ-RTR
 sed -i 's/BOOTPROTO=dhcp4/BOOTPROTO=static/g' /etc/net/ifaces/ens18/options
 sed -i 's/BOOTPROTO=dhcp/BOOTPROTO=static/g' /etc/net/ifaces/ens18/options
-echo "192.168.1.2/27" > /etc/net/ifaces/ens18/ipv4address
-echo "default via 192.168.1.1" > /etc/net/ifaces/ens18/ipv4route
+echo "192.168.10.66/27" > /etc/net/ifaces/ens18/ipv4address
+echo "default via 192.168.10.65" > /etc/net/ifaces/ens18/ipv4route
 echo "nameserver 8.8.8.8" > /etc/net/ifaces/ens18/resolv.conf
 systemctl restart network
 
@@ -251,6 +251,7 @@ nmcli connection modify gre1 ip-tunnel.ttl 64
 #nmcli connection up gre1
 
 systemctl restart network
+systemctl restart NetworkManager
 ```
 
 Настройка туннеля на BR-RTR
@@ -264,6 +265,7 @@ nmcli connection modify gre1 ip-tunnel.ttl 64
 #nmcli connection up gre1
 
 systemctl restart network
+systemctl restart NetworkManager
 ```
 
 ## Задание 7 Обеспечьте динамическую маршрутизацию
@@ -283,9 +285,9 @@ ip forwarding
 router ospf
 passive-interface default
 network 10.0.1.0/30 area 0
-network 192.168.100.0/26 area 0
-network 192.168.200.0/28 area 0
-network 192.168.99.0/29 area 0
+network 192.168.10.0/26 area 0
+network 192.168.10.96/28 area 0
+network 192.168.10.112/29 area 0
 ex
 int gre1
 no ip ospf passive
@@ -308,7 +310,7 @@ ip forwarding
 router ospf
 passive-interface default
 network 10.0.1.0/30 area 0
-network 192.168.1.0/27 area 0
+network 192.168.10.64/27 area 0
 ex
 int gre1
 no ip ospf passive
@@ -342,22 +344,22 @@ vim /etc/dhcp/dhcpd.conf
 ```
 ddns-update-style interim;
 
-subnet 192.168.200.0 netmask 255.255.255.240 {
-        option routers                  192.168.200.1;
+subnet 192.168.10.96 netmask 255.255.255.240 {
+        option routers                  192.168.10.97;
         option subnet-mask              255.255.255.240;
 
         option nis-domain               "au-team.irpo";
         option domain-name              "au-team.irpo";
-        option domain-name-servers      192.168.100.2;
+        option domain-name-servers      192.168.10.2;
 
-        range dynamic-bootp 192.168.200.2 192.168.200.14;
+        range dynamic-bootp 192.168.10.99 192.168.10.110;
         default-lease-time 21600;
         max-lease-time 43200;
 }
 
 host hq-cli {
-        hardware ethernet bc:24:11:d4:bf:29;
-        fixed-address 192.168.200.2;
+        hardware ethernet BC:24:11:A0:14:E5;
+        fixed-address 192.168.10.98;
 }
 ```
 ```sh
@@ -394,9 +396,9 @@ echo "  file \"au-team\";" >> /var/lib/bind/etc/rfc1912.conf
 echo "};" >> /var/lib/bind/etc/rfc1912.conf
 echo "" >> /var/lib/bind/etc/rfc1912.conf
 
-echo "zone \"100.168.192.in-addr.arpa\" {" >> /var/lib/bind/etc/rfc1912.conf
+echo "zone \"10.168.192.in-addr.arpa\" {" >> /var/lib/bind/etc/rfc1912.conf
 echo "  type master;" >> /var/lib/bind/etc/rfc1912.conf
-echo "  file \"vlan100\";" >> /var/lib/bind/etc/rfc1912.conf
+echo "  file \"local\";" >> /var/lib/bind/etc/rfc1912.conf
 echo "};" >> /var/lib/bind/etc/rfc1912.conf
 echo "" >> /var/lib/bind/etc/rfc1912.conf
 
@@ -430,12 +432,12 @@ $TTL    1D
                                 1H              ; ncache
                         )
         IN      NS      hq-srv.au-team.irpo.
-        IN      A       192.168.100.2
-hq-rtr  IN      A       192.168.100.1
-br-rtr  IN      A       192.168.1.1
-hq-srv  IN      A       192.168.100.2
-hq-cli  IN      A       192.168.200.2
-br-srv  IN      A       192.168.1.2
+        IN      A       192.168.10.2
+hq-rtr  IN      A       192.168.10.1
+br-rtr  IN      A       192.168.10.65
+hq-srv  IN      A       192.168.10.2
+hq-cli  IN      A       192.168.10.98
+br-srv  IN      A       192.168.10.66
 
 moodle  IN      CNAME   hq-rtr.
 wiki    IN      CNAME   hq-rtr.
@@ -444,17 +446,23 @@ wiki    IN      CNAME   hq-rtr.
 Содержимое файла vlan100
 ```
 $TTL    1D
-@       IN      SOA     100.168.192.in-addr.arpa. root.100.168.192.in-addr.arpa. (
+@       IN      SOA     10.168.192.in-addr.arpa. root.10.168.192.in-addr.arpa. (
                                 2025020600      ; serial
                                 12H             ; refresh
                                 1H              ; retry
                                 1W              ; expire
                                 1H              ; ncache
                         )
-        IN      NS      100.168.192.in-addr.arpa.
-        IN      A       192.168.100.2
-2       IN      PTR     hq-srv.au-team.irpo.
+        IN      NS      10.168.192.in-addr.arpa.
+        IN      A       192.168.10.2
 1       IN      PTR     hq-rtr.au-team.irpo.
+2       IN      PTR     hq-srv.au-team.irpo.
+65      IN      PTR     br-rtr.au-team.irpo.
+66      IN      PTR     br-srv.au-team.irpo.
+97      IN      PTR     hq-rtr.au-team.irpo.
+98      IN      PTR     hq-cli.au-team.irpo.
+113     IN      PTR     hq-rtr.au-team.irpo.
+
 ```
 
 Содержимое файла vlan200
@@ -484,7 +492,8 @@ systemctl enable --now bind
 
 Прописываем на всех машинах resolv.conf
 ```sh
-echo "nameserver 192.168.100.2" > /etc/net/ifaces/ens18/resolv.conf
+echo "nameserver 192.168.10.2" > /etc/net/ifaces/ens18/resolv.conf
+echo "nameserver 8.8.8.8" >> /etc/net/ifaces/ens18/resolv.conf
 echo "domain au-team.irpo" >> /etc/net/ifaces/ens18/resolv.conf
 systemctl restart network
 ```
