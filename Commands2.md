@@ -228,6 +228,7 @@ iptables-save
 
 Команды для hq-rtr
 ```sh
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.100.2:80
 iptables -t nat -A PREROUTING -p tcp --dport 2024 -j DNAT --to-destination 192.168.100.2:2024
 iptables-save > /etc/sysconfig/iptables
 systemctl restart iptables

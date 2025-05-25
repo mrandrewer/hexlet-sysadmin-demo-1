@@ -436,8 +436,8 @@ hq-srv  IN      A       192.168.100.2
 hq-cli  IN      A       192.168.200.2
 br-srv  IN      A       192.168.1.2
 
-moodle  IN      CNAME   hq-rtr.
-wiki    IN      CNAME   hq-rtr.
+moodle  IN      CNAME   hq-rtr
+wiki    IN      CNAME   hq-rtr
 ```
 
 Содержимое файла vlan100
