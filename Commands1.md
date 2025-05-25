@@ -161,11 +161,10 @@ systemctl enable --now iptables
 # Установка и настройка NetworkManager
 apt-get install NetworkManager-tui -y
 systemctl enable --now NetworkManager
-nmcli con mod "Wired connection 2" ipv4.method "manual" ipv4.addresses "192.168.1.1/27"
 
-#mkdir /etc/net/ifaces/ens19
-#cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
-#echo "192.168.1.1/27" > /etc/net/ifaces/ens19/ipv4address
+mkdir /etc/net/ifaces/ens19
+cp /etc/net/ifaces/ens18/options /etc/net/ifaces/ens19/options
+echo "192.168.1.1/27" > /etc/net/ifaces/ens19/ipv4address
 systemctl restart network
 
 # Вывод hostname и сетевых интерфейсов
@@ -368,7 +367,7 @@ systemctl enable --now dhcpd
 
 ## Задание 10 Настройка DNS для офисов HQ и BR
 
-Настройка dns server на HQ-RTR
+Настройка dns server на HQ-SRV
 
 Устанавливаем сервер
 ```sh
